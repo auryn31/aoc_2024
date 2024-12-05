@@ -55,22 +55,6 @@ defmodule Day04 do
           Enum.at(Enum.at(matrix, colIdx), rowIdx + 2) == "M" and
           Enum.at(Enum.at(matrix, colIdx + 2), rowIdx + 2) == "S"
 
-      # IO.inspect(
-      #   Enum.at(Enum.at(matrix, colIdx), rowIdx) <>
-      #     "." <> Enum.at(Enum.at(matrix, colIdx), rowIdx + 2)
-      # )
-      #
-      # IO.inspect("." <> Enum.at(Enum.at(matrix, colIdx + 1), rowIdx + 1) <> ".")
-      #
-      # IO.inspect(
-      #   Enum.at(Enum.at(matrix, colIdx + 2), rowIdx) <>
-      #     "." <> Enum.at(Enum.at(matrix, colIdx + 2), rowIdx + 2)
-      # )
-      # IO.inspect("")
-
-      # Enum.at(Enum.at(matrix, colIdx + 2), rowIdx) == "M" and
-      # Enum.at(Enum.at(matrix, colIdx + 2), rowIdx + 2) == "S"
-
       if isA or isB or isC or isD do
         1
       else
