@@ -2,11 +2,38 @@ defmodule Day06 do
   def part1(content) do
     map = parseInput(content)
     initialPos = initialPosition(map)
-    resultMap = move(map, initialPos)
-    countVisitedPosition(resultMap) + 1
+    {resultMap, _} = move(map, initialPos, MapSet.new())
+    countVisitedPosition(resultMap)
   end
 
   def part2(content) do
+    originalMap = parseInput(content)
+    initialPos = initialPosition(originalMap)
+    {resultMap, _} = move(originalMap, initialPos, MapSet.new())
+
+    resultMap
+    |> Enum.with_index()
+    |> Enum.map(fn {row, y} ->
+      Enum.with_index(row)
+      |> Enum.reduce(0, fn {elem, x}, acc ->
+        if elem == "X" do
+          obstracleMap =
+            List.replace_at(originalMap, y, List.replace_at(Enum.at(originalMap, y), x, "#"))
+
+          acc + isLoop(obstracleMap, initialPos)
+        else
+          acc
+        end
+      end)
+    end)
+    |> Enum.sum()
+  end
+
+  defp isLoop(map, pos) do
+    case move(map, pos, MapSet.new()) do
+      {_, :loop} -> 1
+      _ -> 0
+    end
   end
 
   defp countVisitedPosition(map) do
@@ -22,27 +49,25 @@ defmodule Day06 do
   end
 
   defp initialPosition(map) do
-    right = find_element(map, ">", :right)
-    left = find_element(map, "<", :left)
-    top = find_element(map, "^", :top)
-    down = find_element(map, "v", :down)
-
-    if right == nil and left == nil and top == nil and down == nil do
-      IO.puts("Error: Invalid map")
-      exit(1)
+    case find_element(map, "^", :up) do
+      nil -> raise "Invalid map"
+      pos -> pos
     end
-
-    Enum.filter([right, left, top, down], fn x -> x != nil end) |> Enum.at(0)
   end
 
-  defp move(map, currentPosition) do
-    next = nextPosition(map, currentPosition)
-
-    if next == nil do
-      map
+  defp move(map, currentPosition, history) do
+    if MapSet.member?(history, currentPosition) do
+      {map, :loop}
     else
-      map = updateMap(map, currentPosition)
-      move(map, next)
+      history = MapSet.put(history, currentPosition)
+      next = nextPosition(map, currentPosition)
+
+      if next == nil do
+        {map, :success}
+      else
+        map = updateMap(map, next)
+        move(map, next, history)
+      end
     end
   end
 
@@ -52,65 +77,33 @@ defmodule Day06 do
     List.replace_at(map, y, List.replace_at(Enum.at(map, y), x, "X"))
   end
 
+  defp getNexIfPossible(map, nextPos, alternative) do
+    if nextPosIsOutOfMap(map, nextPos) do
+      nil
+    else
+      if nextPosIsObstracle(map, nextPos) do
+        alternative
+      else
+        nextPos
+      end
+    end
+  end
+
   defp nextPosition(map, position) do
-    {_, _, direction} = position
+    {x, y, direction} = position
 
     case direction do
       :right ->
-        {x, y, _} = position
-        nextPos = {x + 1, y, :right}
-
-        if nextPosIsOutOfMap(map, nextPos) do
-          nil
-        else
-          if nextPosIsObstracle(map, nextPos) do
-            {x, y + 1, :down}
-          else
-            nextPos
-          end
-        end
+        getNexIfPossible(map, {x + 1, y, :right}, {x, y + 1, :down})
 
       :left ->
-        {x, y, _} = position
-        nextPos = {x - 1, y, :left}
+        getNexIfPossible(map, {x - 1, y, :left}, {x, y - 1, :up})
 
-        if nextPosIsOutOfMap(map, nextPos) do
-          nil
-        else
-          if nextPosIsObstracle(map, nextPos) do
-            {x, y - 1, :top}
-          else
-            nextPos
-          end
-        end
-
-      :top ->
-        {x, y, _} = position
-        nextPos = {x, y - 1, :top}
-
-        if nextPosIsOutOfMap(map, nextPos) do
-          nil
-        else
-          if nextPosIsObstracle(map, nextPos) do
-            {x + 1, y, :right}
-          else
-            nextPos
-          end
-        end
+      :up ->
+        getNexIfPossible(map, {x, y - 1, :up}, {x + 1, y, :right})
 
       :down ->
-        {x, y, _} = position
-        nextPos = {x, y + 1, :down}
-
-        if nextPosIsOutOfMap(map, nextPos) do
-          nil
-        else
-          if nextPosIsObstracle(map, nextPos) do
-            {x - 1, y, :left}
-          else
-            nextPos
-          end
-        end
+        getNexIfPossible(map, {x, y + 1, :down}, {x - 1, y, :left})
     end
   end
 
@@ -138,9 +131,9 @@ end
 
 # fileContent = File.read!("input.test.txt")
 fileContent = File.read!("input.txt")
-IO.puts("Part 1")
-result = Day06.part1(fileContent)
-IO.puts("Result: #{result}")
+# IO.puts("Part 1")
+# result = Day06.part1(fileContent)
+# IO.puts("Result: #{result} Expected: 5329")
 IO.puts("Part 2")
 result = Day06.part2(fileContent)
-IO.puts("Result: #{result}")
+IO.puts("Result: #{result} Expected: 2162")
