@@ -60,7 +60,7 @@ defmodule Day06 do
       {map, :loop}
     else
       history = MapSet.put(history, currentPosition)
-      next = nextPosition(map, currentPosition)
+      next = getNexIfPossible(map, currentPosition)
 
       if next == nil do
         {map, :success}
@@ -71,49 +71,46 @@ defmodule Day06 do
     end
   end
 
-  defp updateMap(map, position) do
-    {x, y, _} = position
-
+  defp updateMap(map, {x, y, _}) do
     List.replace_at(map, y, List.replace_at(Enum.at(map, y), x, "X"))
   end
 
-  defp getNexIfPossible(map, nextPos, alternative) do
+  defp getNexIfPossible(map, {x, y, rotation}) do
+    {dx, dy} =
+      case rotation do
+        :right -> {1, 0}
+        :left -> {-1, 0}
+        :up -> {0, -1}
+        :down -> {0, 1}
+      end
+
+    nextPos = {x + dx, y + dy, rotation}
+
     if nextPosIsOutOfMap(map, nextPos) do
       nil
     else
       if nextPosIsObstracle(map, nextPos) do
-        alternative
+        getNexIfPossible(map, rotate({x, y, rotation}))
       else
         nextPos
       end
     end
   end
 
-  defp nextPosition(map, position) do
-    {x, y, direction} = position
-
-    case direction do
-      :right ->
-        getNexIfPossible(map, {x + 1, y, :right}, {x, y + 1, :down})
-
-      :left ->
-        getNexIfPossible(map, {x - 1, y, :left}, {x, y - 1, :up})
-
-      :up ->
-        getNexIfPossible(map, {x, y - 1, :up}, {x + 1, y, :right})
-
-      :down ->
-        getNexIfPossible(map, {x, y + 1, :down}, {x - 1, y, :left})
+  defp rotate({x, y, rotation}) do
+    case rotation do
+      :right -> {x, y, :down}
+      :down -> {x, y, :left}
+      :left -> {x, y, :up}
+      :up -> {x, y, :right}
     end
   end
 
-  defp nextPosIsObstracle(map, nexPos) do
-    {x, y, _} = nexPos
+  defp nextPosIsObstracle(map, {x, y, _}) do
     Enum.at(Enum.at(map, y), x) == "#"
   end
 
-  defp nextPosIsOutOfMap(map, nextPos) do
-    {x, y, _} = nextPos
+  defp nextPosIsOutOfMap(map, {x, y, _}) do
     x < 0 || y < 0 || x >= Enum.count(Enum.at(map, 0)) || y >= Enum.count(map)
   end
 
@@ -131,9 +128,9 @@ end
 
 # fileContent = File.read!("input.test.txt")
 fileContent = File.read!("input.txt")
-# IO.puts("Part 1")
-# result = Day06.part1(fileContent)
-# IO.puts("Result: #{result} Expected: 5329")
+IO.puts("Part 1")
+result = Day06.part1(fileContent)
+IO.puts("Result: #{result} Expected: 5329")
 IO.puts("Part 2")
 result = Day06.part2(fileContent)
 IO.puts("Result: #{result} Expected: 2162")
