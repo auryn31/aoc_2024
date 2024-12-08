@@ -39,14 +39,27 @@ defmodule Day07 do
             dx = x2 - x1
             dy = y2 - y1
 
-            x3 = rem(x1 + 2 * dx, width)
-            y3 = rem(y1 + 2 * dy, height)
+            x3 = x2 + dx
+            y3 = y2 + dy
+            x4 = x1 - dx
+            y4 = y1 - dy
 
-            x4 = rem(x1 - dx + width, width)
-            y4 = rem(y1 - dy + height, height)
+            toAdd =
+              if x3 >= 0 and x3 < width and y3 >= 0 and y3 < height do
+                [{x3, y3}]
+              else
+                []
+              end
+
+            toAdd =
+              if x4 >= 0 and x4 < width and y4 >= 0 and y4 < height do
+                toAdd ++ [{x4, y4}]
+              else
+                []
+              end
 
             current = Map.get(acc_inner, "#", [])
-            Map.put(acc_inner, "#", current ++ [{x3, y3}, {x4, y4}])
+            Map.put(acc_inner, "#", current ++ toAdd)
           else
             acc_inner
           end
@@ -74,8 +87,8 @@ defmodule Day07 do
   end
 end
 
-fileContent = File.read!("input.test.txt")
-# fileContent = File.read!("input.txt")
+# fileContent = File.read!("input.test.txt")
+fileContent = File.read!("input.txt")
 IO.puts("Part 1")
 result = Day07.part1(fileContent)
 IO.puts("Result: #{result} Expected: 14")
