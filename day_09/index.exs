@@ -34,7 +34,7 @@ defmodule Day09 do
       leftBlockSize = getBlockSize(list, Enum.at(list, leftPointer), leftPointer, 0, :forward)
       rightBlockSize = getBlockSize(list, Enum.at(list, rightPointer), rightPointer, 0, :backward)
 
-      if leftPointer + rightBlockSize > rightPointer do
+      if leftPointer > rightPointer do
         moveParts(list, 0, rightPointer - rightBlockSize)
       else
         if leftBlockSize >= rightBlockSize do
@@ -67,15 +67,6 @@ defmodule Day09 do
 
     leftBegin ++ rightBlock ++ leftEnd ++ leftBlock ++ rightEnd
   end
-
-  # defp switchElements(list, leftPointer, rightPointer) do
-  #   left = Enum.at(list, leftPointer)
-  #   right = Enum.at(list, rightPointer)
-  #
-  #   list
-  #   |> List.replace_at(leftPointer, right)
-  #   |> List.replace_at(rightPointer, left)
-  # end
 
   defp moveNumbers(list) do
     leftPointer = 0
@@ -170,9 +161,9 @@ end
 
 # fileContent = File.read!("input.test.txt")
 fileContent = File.read!("input.txt")
-# IO.puts("Part 1")
-# result = Day09.part1(fileContent)
-# IO.puts("Result: #{result} Expected: 6344673854800")
+IO.puts("Part 1")
+{time, result} = :timer.tc(Day09, :part1, [fileContent])
+IO.puts("Result: #{result} in #{Integer.floor_div(time, 1_000_000)}s; Expected: 6344673854800")
 IO.puts("Part 2")
-result = Day09.part2(fileContent)
-IO.puts("Result: #{result} Expected: 1200")
+{time, result} = :timer.tc(Day09, :part2, [fileContent])
+IO.puts("Result: #{result} in #{Integer.floor_div(time, 1_000_000)}s; Expected: ??")
