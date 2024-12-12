@@ -1,17 +1,21 @@
 import time
 
 from typing import List, Tuple
-from enum import Enum
 
 
 def part1(content: str) -> int:
     matrix = parse_matrix(content)
     regions = []
+    seen = set()
     for i in range(len(matrix)):
         for j in range(len(matrix[i])):
+            if (i, j) in seen:
+                continue
             target = matrix[i][j]
             region = get_region(matrix, (i, j), [], target)
             sorted = sort_region(region)
+            for pos in sorted:
+                seen.add(pos)
             if len(sorted) > 0 and not region_exists(sorted, regions):
                 regions.append(sorted)
     sum = 0
@@ -21,7 +25,23 @@ def part1(content: str) -> int:
 
 
 def part2(content: str) -> int:
+    matrix = parse_matrix(content)
+    regions = []
+    seen = set()
+    for i in range(len(matrix)):
+        for j in range(len(matrix[i])):
+            if (i, j) in seen:
+                continue
+            target = matrix[i][j]
+            region = get_region(matrix, (i, j), [], target)
+            sorted = sort_region(region)
+            for pos in sorted:
+                seen.add(pos)
+            if len(sorted) > 0 and not region_exists(sorted, regions):
+                regions.append(sorted)
     sum = 0
+    for region in regions:
+        sum = sum + area(region) * calculate_corners(region)
     return sum
 
 
@@ -37,6 +57,64 @@ def perimeter(region: List[Tuple[int, int]]) -> int:
             if (pos[0] + dx, pos[1] + dy) not in region:
                 sum = sum + 1
     return sum
+
+
+def calculate_corners(region: List[Tuple[int, int]]) -> int:
+    corners = 0
+    for x, y in region:
+        # Top-left corner
+        # Inside corner
+        if (
+            (x - 1, y) in region
+            and (x, y - 1) in region
+            and not (x - 1, y - 1) in region
+        ):
+            corners += 1
+
+        # Outside corner
+        if not (x - 1, y) in region and not (x, y - 1) in region:
+            corners += 1
+
+        # Top-right corner
+        # Inside corner
+        if (
+            (x + 1, y) in region
+            and (x, y - 1) in region
+            and not (x + 1, y - 1) in region
+        ):
+            corners += 1
+
+        # Outside corner
+        if not (x + 1, y) in region and not (x, y - 1) in region:
+            corners += 1
+
+        # Bottom-left corner
+        # Inside corner
+        if (
+            (x - 1, y) in region
+            and (x, y + 1) in region
+            and not (x - 1, y + 1) in region
+        ):
+            corners += 1
+
+        # Outside corner
+        if not (x - 1, y) in region and not (x, y + 1) in region:
+            corners += 1
+
+        # Bottom-right corner
+        # Inside corner
+        if (
+            (x + 1, y) in region
+            and (x, y + 1) in region
+            and not (x + 1, y + 1) in region
+        ):
+            corners += 1
+
+        # Outside corner
+        if not (x + 1, y) in region and not (x, y + 1) in region:
+            corners += 1
+
+    return corners
 
 
 def region_exists(
@@ -90,11 +168,11 @@ def is_in_matrix(matrix: List[List[str]], x: int, y: int) -> bool:
 
 
 if __name__ == "__main__":
-    with open("input.test.txt", "r") as file:
-        file_content = file.read()
-
-    # with open("input.txt", "r") as file:
+    # with open("input.test.txt", "r") as file:
     #     file_content = file.read()
+
+    with open("input.txt", "r") as file:
+        file_content = file.read()
     print("Part 1")
     start = time.time()
     result = part1(file_content)
@@ -103,6 +181,4 @@ if __name__ == "__main__":
     print("Part 2")
     start = time.time()
     result = part2(file_content)
-    print(
-        f"Result: {result} in {round(time.time() - start, 4)}s; Expected: 224869647102559"
-    )
+    print(f"Result: {result} in {round(time.time() - start, 4)}s; Expected: 830516")
