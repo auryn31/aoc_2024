@@ -2,6 +2,7 @@ import time
 import math
 
 from typing import List, Tuple
+from PIL import Image
 
 
 class Robot:
@@ -22,12 +23,9 @@ class Robot:
 
 def part1(content: str, area: Tuple[int, int]) -> int:
     robots = parse_file(content)
-    for i in range(100):
-        # print(f"Step {i}")
+    for _ in range(100):
         for robot in robots:
             robot.move(area)
-            # print(robot)
-        # print_area(robots, area)
 
     quadrants = count_in_quadrant(robots, area)
     print(quadrants)
@@ -44,9 +42,20 @@ def print_area(robots: List[Robot], area: Tuple[int, int]):
         print("".join(row))
 
 
-def part2(content: str) -> int:
-    sum = 0
-    return int(sum)
+def draw_image(robots: List[Robot], area: Tuple[int, int], itteration: int):
+    [width, height] = area
+    im = Image.new("RGB", (width, height), (255, 255, 255))
+    for robot in robots:
+        im.putpixel(robot.pos, (0, 0, 0))
+    im.save(f"images/image_#{itteration}.png")
+
+
+def part2(content: str, area: Tuple[int, int], itterations: int):
+    robots = parse_file(content)
+    for i in range(itterations):
+        for robot in robots:
+            robot.move(area)
+        draw_image(robots, area, i + 1)
 
 
 def quadrant_size(area: int) -> int:
@@ -102,7 +111,7 @@ if __name__ == "__main__":
 
     print("Part 2")
     start = time.time()
-    result = part2(file_content)
+    result = part2(file_content, area, 10000)
     print(
         f"Result: {result} in {round(time.time() - start, 4)}s; Expected: 74478585072604"
     )
