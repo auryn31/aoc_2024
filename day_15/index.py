@@ -1,8 +1,6 @@
 import time
-import math
 
 from typing import List, Tuple
-from PIL import Image
 
 
 class Robot:
